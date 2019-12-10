@@ -1,6 +1,21 @@
 # Cloudstate Session Manager
+## Description
+This example has a Cloudstate user function containing 2 services. It gives you an example of a command fowarding to another service.
+
+It represent a Session Manager which manage Home Account like you may have when you access a Video Streaming platform. You buy an account which allows a limited number of people to watch video simultanously. For each video you start to watch from a device, the device needs a session. It means that the device can ask the "Home" service for:
+- session creation
+- session renewal (HeartBeat)
+- session termination (TearDown)
+
+Note: If the device tries to ask for an extra session above the max number of sessions of the Home account, then you will have an error.
+
+There is a second service called "Device" which manage the device / account relationship. This is needed because a device may ask for a session without the account ID but with the device ID. This is the scenario:
+1. The deviced send a createSession with device ID to the "Device" service
+2. The "Device" service knows the account ID for the device (it should have been set beforehand to the "Device" service)
+3. With the account ID, the "Device" account forward the request to the "Home" service which will return the new session created to the device.
 
 ## Run on Minikube with Cassandra
+To run this example, you need to run some command in this project: https://github.com/cloudstateio/cloudstate
 
 1. `minikube start --vm-driver=hyperkit --memory 8192 --cpus 2`
 2. ```eval $(minikube docker-env)```
