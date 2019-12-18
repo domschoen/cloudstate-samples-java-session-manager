@@ -16,10 +16,13 @@ Those 2 services runs in the same Cloudstate user function because we want to fo
 ### Standard use case: the device knows the account ID
 In this standard use case, the device uses the first service "Home".
 For each video the user start to watch from a device, the device needs a session. It means that the device ask the "Home" service for:
+
 - session creation
 Then the device will regularly ask for session renewal with command:
+
 - session renewal (HeartBeat)
-When the user has finished watching a video, the device will terminate the session sending 
+When the user has finished watching a video, the device will terminate the session sending:
+
 - session termination (TearDown)
 
 Note: If a device tries to ask for an extra session above the max number of sessions of the Home account, then you will have an error.
@@ -56,7 +59,7 @@ To run this example, you need to run some command in this project: https://githu
 5. ```kubectl create namespace cloudstate```
 6. ```kubectl apply -n cloudstate -f operator/cloudstate-dev.yaml```
 7. Edit config to remove "native-" in images:```kubectl edit -n cloudstate configmap cloudstate-operator-config```
-8. ```cd csamples-java-session-manager```
+8. ```cd cloudstate-samples-java-session-manager```
 9. ```kubectl apply -f descriptors/store/cassandra-store.yaml```
 10. ```kubectl apply -f descriptors/cassandra```
 11. ```sbt -Ddocker.tag=dev
