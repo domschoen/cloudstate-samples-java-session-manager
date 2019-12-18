@@ -18,9 +18,11 @@ In this standard use case, the device uses the first service "Home".
 For each video the user start to watch from a device, the device needs a session. It means that the device ask the "Home" service for:
 
 - session creation
+
 Then the device will regularly ask for session renewal with command:
 
 - session renewal (HeartBeat)
+
 When the user has finished watching a video, the device will terminate the session sending:
 
 - session termination (TearDown)
