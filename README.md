@@ -15,17 +15,17 @@ Those 2 services runs in the same Cloudstate user function because we want to fo
 
 ### Standard use case: the device knows the account ID
 In this standard use case, the device uses the first service "Home".
-For each video the user start to watch from a device, the device needs a session. It means that the device ask the "Home" service for:
+For each video the user start to watch from a device, the device needs a session. It means that the device send to the "Home" service the command:
 
-- session creation
+- CreateSession
 
 Then the device will regularly ask for session renewal with command:
 
-- session renewal (HeartBeat)
+- HeartBeat
 
-When the user has finished watching a video, the device will terminate the session sending:
+When the user has finished watching a video, the device will terminate the session sending command:
 
-- session termination (TearDown)
+- TearDown
 
 Note: If a device tries to ask for an extra session above the max number of sessions of the Home account, then you will have an error.
 
