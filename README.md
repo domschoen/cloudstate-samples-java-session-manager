@@ -1,18 +1,45 @@
 # Cloudstate Session Manager
 ## Description
-This example has a Cloudstate user function containing 2 services. It gives you an example of a command fowarding to another service.
+Example of a Session Manager which manage sessions for accounts like you may have when using a video streaming platform.
+In such platform, depending on your subscription, you may have more or less simultaneous viewings (= sessions).
+Here we represent subscription as Home entity and the number of simultaneous viewing by the max number of sessions.
 
-It represent a Session Manager which manage Home Account like you may have when you access a Video Streaming platform. You buy an account which allows a limited number of people to watch video simultanously. For each video you start to watch from a device, the device needs a session. It means that the device can ask the "Home" service for:
+We have 2 services:
+
+| Service   | Entity    | Entity Key    |
+| --------- | --------- | ------------- |
+| SM        | Home      | Account ID    |
+| Device    | Device    | Device ID     |
+
+Those 2 services runs in the same Cloudstate user function because we want to forward from one service to the other (and this is only possible inside the same user function).
+
+### Standard use case: the device knows the account ID
+In this standard use case, the device uses the first service "Home".
+For each video the user start to watch from a device, the device needs a session. It means that the device ask the "Home" service for:
 - session creation
+Then the device will regularly ask for session renewal with command:
 - session renewal (HeartBeat)
+When the user has finished watching a video, the device will terminate the session sending 
 - session termination (TearDown)
 
-Note: If the device tries to ask for an extra session above the max number of sessions of the Home account, then you will have an error.
+Note: If a device tries to ask for an extra session above the max number of sessions of the Home account, then you will have an error.
 
-There is a second service called "Device" which manage the device / account relationship. This is needed because a device may ask for a session without the account ID but with the device ID. This is the scenario:
-1. The deviced send a createSession with device ID to the "Device" service
-2. The "Device" service knows the account ID for the device (it should have been set beforehand to the "Device" service)
-3. With the account ID, the "Device" account forward the request to the "Home" service which will return the new session created to the device.
+### Why do we need a Device service ?
+When you use the Home service you are using the account ID but we wanted to cover a special use case: The device doesn't always knows the account ID and may ask for a session with only the device ID. In that case, the session manager should use another service to get the account ID from Device ID and then proceed as usual.
+
+At first we wanted to have a service able to represent the Account - Devices relationship i.e the Account having multiple Devices registered but what we need is this:
+- getDeviceID(deviceID) returning AccountID
+
+That command is not possible if we represent account because the key of an account is the account ID. If you look at the command above we cannot pass the account ID because it is what we want in the response ! This command would be possible with a projection (read side) but this functionality is not available for the moment in CloudState.
+
+To solve the problem we decided to use the Device ID as the key and have a Device service even if it not exactly what we wanted.
+
+### What happened if the device want a session knowing only the Device ID ?
+In such case the device will not ask the Home service but the Device service for the session creation. Here the steps:
+
+1. The device ask the Device service for the session passing the device ID
+2. The "Device" service knows the account ID for the device ID (it should have been set beforehand to the "Device" service with the CreateDevice command)
+3. The "Device" service takes the account ID and forward the session creation command with the account ID to the "Home" service which will return the new session created to the device.
 
 ## Run on Minikube with Cassandra
 To run this example, you need to run some command in this project: https://github.com/cloudstateio/cloudstate
@@ -44,7 +71,7 @@ To run this example, you need to run some command in this project: https://githu
     http://192.168.64.35:30320
     grpcurl -plaintext 192.168.64.35:30320 describe
     ```
-14. To try it, launch Postman with:
+14. To try it, launch Postman with for example:
 
     |        | Value                                                  |
     | ------ | ------------------------------------------------------ |
